@@ -4,8 +4,8 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const util = require('util');
-const startChoices = ["View", "Add", "Update"]
-const tables = ["department", "role", "employees"]
+const startChoices = ["View departments", "View roles", "View employees", "Add departments", "Add roles", "Add employees", "Update employee roles"]
+const tables = ["Department", "Role", "Employees"]
 // const otherUtils = require('./utils/generateMarkdown')
 
 // array of questions for user
