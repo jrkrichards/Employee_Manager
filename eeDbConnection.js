@@ -17,7 +17,7 @@ const connection = mysql.createConnection({
 
   // Be sure to update with your own MySQL password!
   password: 'Password',
-  database: 'eeManager_db',
+  database: 'eemanager_db',
 });
 
 connection.connect((err) => {
@@ -76,18 +76,30 @@ const eeManage = () => {
 };
 
 const viewDepartments = () => {
-  console.log("View Departments");
-  eeManage();
+  const query = 'SELECT * FROM department';
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    eeManage();
+  });
 };
 
 const viewRoles = () => {
-  console.log("View Roles");
-  eeManage();
+  const query = 'SELECT * FROM role';
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    eeManage();
+  });
 };
 
 const viewEmployees = () => {
-  console.log("View Employees");
-  eeManage();
+  const query = 'SELECT * FROM employees';
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    eeManage();
+  });
 };
 
 const addDepartments = () => {
