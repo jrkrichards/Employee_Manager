@@ -1,11 +1,5 @@
-// Variables
-const inquirer = require('inquirer');
-const fs = require('fs');
-const util = require('util');
-const actions = ["View departments", "View roles", "View employees", "Add departments", "Add roles", "Add employees", "Update employee roles", "Exit"]
-const tables = ["Department", "Role", "Employees"]
+// Connecting to mysql
 const mysql = require('mysql');
-
 const connection = mysql.createConnection({
   host: 'localhost',
 
@@ -23,8 +17,56 @@ const connection = mysql.createConnection({
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}`);
-  eeManage();
+  setDep();
 });
+
+// Variables
+const inquirer = require('inquirer');
+const fs = require('fs');
+const util = require('util');
+const { setServers } = require('dns');
+const actions = ["View departments", "View roles", "View employees", "Add departments", "Add roles", "Add employees", "Update employee roles", "Exit"]
+const tables = ["Department", "Role", "Employees"]
+let curDepartments = []
+let curRoles = []
+let curEmployees = []
+
+const currentDepartments = (value) => {
+  curDepartments = JSON.stringify(value);
+  console.log(curDepartments);
+  setRole();
+};
+const currentRoles = (value) => {
+  curRoles = JSON.stringify(value);
+  console.log(curRoles);
+  setEmployees();
+};
+const currentEes = (value) => {
+  curEmployees = JSON.stringify(value);
+  console.log(curEmployees)
+  eeManage();
+};
+
+const setDep = () => {
+  connection.query('SELECT * FROM department', (err, res) => {
+    if (err) throw err;
+    currentDepartments(res);
+  });
+};
+
+const setRole = () => {
+  connection.query('SELECT * FROM role', (err, res) => {
+      if (err) throw err;
+      currentRoles(res);
+    });
+}
+
+const setEmployees = () => {
+  connection.query('SELECT * FROM employees', (err, res) => {
+    if (err) throw err;
+    currentEes(res);
+  });
+};
 
 const eeManage = () => {
   inquirer
@@ -103,18 +145,83 @@ const viewEmployees = () => {
 };
 
 const addDepartments = () => {
-  console.log("Add Departments");
-  eeManage();
+  inquirer
+    .prompt({
+      name: 'addDepartment',
+      type: 'input',
+      message: 'What department would you like to add?',
+    })
+    .then((answer) => {
+      const query = 'INSERT INTO department (name) VALUES (?);';
+      connection.query(query, [answer.addDepartment], (err, res) => {
+        if (err) throw err;
+        console.log("Added the department to the database");
+        eeManage();
+      });
+    });
 };
 
 const addRoles = () => {
-  console.log("Add Roles");
-  eeManage();
+  inquirer
+    .prompt([
+      {
+      name: 'roleTitle',
+      type: 'input',
+      message: 'What role would you like to add?',
+        },
+      {
+        name: 'roleSalary',
+        type: 'integer',
+        message: 'What is the salary of the role?',
+        },
+      {
+        name: 'roleDepartmentId',
+        type: 'integer',
+        message: 'What is the department id?',
+        },
+    ])
+    .then((answer) => {
+      const query = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);';
+      connection.query(query, [answer.roleTitle, answer.roleSalary, answer.roleDepartmentId], (err, res) => {
+        if (err) throw err;
+        console.log("Added the role to the database");
+        eeManage();
+      });
+    });
 };
 
 const addEmployees = () => {
-  console.log("Add Employees");
-  eeManage();
+  inquirer
+    .prompt([
+      {
+      name: 'firstName',
+      type: 'input',
+      message: 'What is the first name?',
+        },
+      {
+        name: 'lastName',
+        type: 'input',
+        message: 'What is the last name?',
+        },
+      {
+        name: 'role',
+        type: 'input',
+        message: 'What is their role?',
+        },
+      {
+        name: 'manager',
+        type: 'integer',
+        message: 'What is the id of their manager?',
+        },
+    ])
+    .then((answer) => {
+      const query = 'INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);';
+      connection.query(query, [answer.firstName, answer.lastName, answer.role, answer.manager], (err, res) => {
+        if (err) throw err;
+        console.log("Added the employee to the database");
+        eeManage();
+      });
+    });
 };
 
 const updateRoles = () => {
