@@ -205,8 +205,8 @@ const addEmployees = () => {
         },
       {
         name: 'role',
-        type: 'input',
-        message: 'What is their role?',
+        type: 'integer',
+        message: 'What is their role id?',
         },
       {
         name: 'manager',
