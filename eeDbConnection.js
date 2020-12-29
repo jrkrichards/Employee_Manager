@@ -17,54 +17,78 @@ const connection = mysql.createConnection({
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}`);
-  setDep();
+  setupVar();
 });
 
 // Variables
 const inquirer = require('inquirer');
+let curDepartments = []
+let curRoles = []
+let curEmployees = []
+
 const fs = require('fs');
 const util = require('util');
 const { setServers } = require('dns');
 const actions = ["View departments", "View roles", "View employees", "Add departments", "Add roles", "Add employees", "Update employee roles", "Exit"]
 const tables = ["Department", "Role", "Employees"]
-let curDepartments = []
-let curRoles = []
-let curEmployees = []
 
-const currentDepartments = (value) => {
-  curDepartments = JSON.stringify(value);
-  console.log(curDepartments);
-  setRole();
-};
-const currentRoles = (value) => {
-  curRoles = JSON.stringify(value);
-  console.log(curRoles);
-  setEmployees();
-};
-const currentEes = (value) => {
-  curEmployees = JSON.stringify(value);
-  console.log(curEmployees)
-  eeManage();
-};
 
+// const currentDepartments = (value) => {
+//   curDepartments = JSON.stringify(value);
+//   console.log(curDepartments);
+//   setRole();
+// };
+// const currentRoles = (value) => {
+//   curRoles = JSON.stringify(value);
+//   console.log(curRoles);
+//   setEmployees();
+// };
+// const currentEes = (value) => {
+//   curEmployees = JSON.stringify(value);
+//   console.log(curEmployees)
+//   eeManage();
+// };
+
+const setupVar = async () => {
+  try {
+    setDep();
+    setRole();
+    setEmployees();
+    await eeManage();
+  } catch (err) {
+    console.log(err);
+  }
+};
 const setDep = () => {
   connection.query('SELECT * FROM department', (err, res) => {
     if (err) throw err;
-    currentDepartments(res);
+    let length = curDepartments.length
+    curDepartments.splice(0, length);
+    res.forEach(({id, name}) => {
+      curDepartments.push({id, name});
+    });
   });
 };
 
 const setRole = () => {
   connection.query('SELECT * FROM role', (err, res) => {
       if (err) throw err;
-      currentRoles(res);
+      let length = curRoles.length;
+      curRoles.splice(0, length);
+      res.forEach(({id, title, salary, department_id}) => {
+        curRoles.push({id, title, salary, department_id})
+      });
     });
 }
 
 const setEmployees = () => {
   connection.query('SELECT * FROM employees', (err, res) => {
     if (err) throw err;
-    currentEes(res);
+    let length = curEmployees.length;
+    curEmployees.splice(0, length);
+    res.forEach(({id, first_name, last_name, role_id, manager_id}) => {
+      curEmployees.push({id, first_name, last_name, role_id, manager_id});
+    })
   });
 };
 
@@ -122,7 +146,8 @@ const viewDepartments = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
-    eeManage();
+    console.log(curDepartments)
+    setupVar();
   });
 };
 
@@ -131,7 +156,8 @@ const viewRoles = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
-    eeManage();
+    console.log(curRoles);
+    setupVar();
   });
 };
 
@@ -140,7 +166,8 @@ const viewEmployees = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
-    eeManage();
+    console.log(curEmployees);
+    setupVar();
   });
 };
 
@@ -156,7 +183,7 @@ const addDepartments = () => {
       connection.query(query, [answer.addDepartment], (err, res) => {
         if (err) throw err;
         console.log("Added the department to the database");
-        eeManage();
+        setupVar();
       });
     });
 };
@@ -185,7 +212,7 @@ const addRoles = () => {
       connection.query(query, [answer.roleTitle, answer.roleSalary, answer.roleDepartmentId], (err, res) => {
         if (err) throw err;
         console.log("Added the role to the database");
-        eeManage();
+        setupVar();
       });
     });
 };
@@ -219,12 +246,12 @@ const addEmployees = () => {
       connection.query(query, [answer.firstName, answer.lastName, answer.role, answer.manager], (err, res) => {
         if (err) throw err;
         console.log("Added the employee to the database");
-        eeManage();
+        setupVar();
       });
     });
 };
 
 const updateRoles = () => {
   console.log("Update Roles");
-  eeManage();
+  setupVar();
 };
