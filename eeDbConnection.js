@@ -25,6 +25,9 @@ const inquirer = require('inquirer');
 let curDepartments = []
 let curRoles = []
 let curEmployees = []
+let departmentNames = []
+let roleNames = []
+let empNames = []
 
 const fs = require('fs');
 const util = require('util');
@@ -32,23 +35,7 @@ const { setServers } = require('dns');
 const actions = ["View departments", "View roles", "View employees", "Add departments", "Add roles", "Add employees", "Update employee roles", "Exit"]
 const tables = ["Department", "Role", "Employees"]
 
-
-// const currentDepartments = (value) => {
-//   curDepartments = JSON.stringify(value);
-//   console.log(curDepartments);
-//   setRole();
-// };
-// const currentRoles = (value) => {
-//   curRoles = JSON.stringify(value);
-//   console.log(curRoles);
-//   setEmployees();
-// };
-// const currentEes = (value) => {
-//   curEmployees = JSON.stringify(value);
-//   console.log(curEmployees)
-//   eeManage();
-// };
-
+// Set up all of the needed tables as arrays so we can access them.
 const setupVar = async () => {
   try {
     setDep();
@@ -59,6 +46,7 @@ const setupVar = async () => {
     console.log(err);
   }
 };
+
 const setDep = () => {
   connection.query('SELECT * FROM department', (err, res) => {
     if (err) throw err;
@@ -92,6 +80,7 @@ const setEmployees = () => {
   });
 };
 
+// Starting the inquirer questions.
 const eeManage = () => {
   inquirer
     .prompt({
@@ -252,6 +241,41 @@ const addEmployees = () => {
 };
 
 const updateRoles = () => {
-  console.log("Update Roles");
-  setupVar();
+  let eeNames = []
+  let roleNames = []
+  curEmployees.forEach(({id, first_name, last_name}) => {
+    eeNames.push(id+" "+first_name+" "+last_name);
+  });
+  curRoles.forEach(({id, title}) => {
+    roleNames.push(id+" "+title);
+  });
+  inquirer
+    .prompt([
+      {
+      name: 'eeUpdate',
+      type: 'list',
+      message: 'Which employee would you like to update?',
+      choices: eeNames
+        },
+      {
+      name: 'newRole',
+      type: 'list',
+      message: 'What is their new role?',
+      choices: roleNames
+        },
+    ])
+    .then((answer) => {
+      const query = 'UPDATE employees SET role_id = ? WHERE id = ?;';
+      let eeValues = answer.eeUpdate.split(" ")
+      let eeId = eeValues[0]
+      console.log(eeId)
+      let roleValues = answer.newRole.split(" ")
+      let roleId = roleValues[0]
+      console.log(roleId)
+      connection.query(query, [roleId, eeId], (err, res) => {
+        if (err) throw err;
+        console.log("Updated the role in the database");
+        setupVar();
+      });
+    });
 };
