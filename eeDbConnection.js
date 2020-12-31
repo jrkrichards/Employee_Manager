@@ -25,15 +25,12 @@ const inquirer = require('inquirer');
 let curDepartments = []
 let curRoles = []
 let curEmployees = []
-let departmentNames = []
-let roleNames = []
-let empNames = []
-
-const fs = require('fs');
-const util = require('util');
-const { setServers } = require('dns');
 const actions = ["View departments", "View roles", "View employees", "Add departments", "Add roles", "Add employees", "Update employee roles", "Exit"]
-const tables = ["Department", "Role", "Employees"]
+
+// const fs = require('fs');
+// const util = require('util');
+// const { setServers } = require('dns');
+// const tables = ["Department", "Role", "Employees"]
 
 // Set up all of the needed tables as arrays so we can access them.
 const setupVar = async () => {
@@ -135,7 +132,6 @@ const viewDepartments = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
-    console.log(curDepartments)
     setupVar();
   });
 };
@@ -145,17 +141,15 @@ const viewRoles = () => {
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
-    console.log(curRoles);
     setupVar();
   });
 };
 
 const viewEmployees = () => {
-  const query = 'SELECT * FROM employees';
+  const query = 'SELECT employees.id, employees.first_name, employees.last_name, role.title, department.name, role.salary FROM employees';
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
-    console.log(curEmployees);
     setupVar();
   });
 };
