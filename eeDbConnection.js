@@ -172,6 +172,10 @@ const addDepartments = () => {
 };
 
 const addRoles = () => {
+  let departments = []
+  curDepartments.forEach(({id, name}) => {
+    departments.push(id+' '+name)
+  });
   inquirer
     .prompt([
       {
@@ -186,13 +190,16 @@ const addRoles = () => {
         },
       {
         name: 'roleDepartmentId',
-        type: 'integer',
-        message: 'What is the department id?',
+        type: 'list',
+        message: 'Which department?',
+        choices: departments
         },
     ])
     .then((answer) => {
       const query = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);';
-      connection.query(query, [answer.roleTitle, answer.roleSalary, answer.roleDepartmentId], (err, res) => {
+      let departmentValues = answer.roleDepartmentId.split(" ")
+      let departmentId = departmentValues[0]
+      connection.query(query, [answer.roleTitle, answer.roleSalary, departmentId], (err, res) => {
         if (err) throw err;
         console.log("Added the role to the database");
         setupVar();

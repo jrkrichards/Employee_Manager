@@ -83,4 +83,5 @@ CREATE TABLE department
 				("Misty", "Jacob", 3, 1),
 				("Andrea", "Cool", 4, 2),
 				("Charlie", "Patterson", 5, 1),
-				("Emily", "Star", 6, 2);
+				("Emily", "Star", 6, 2),
+				("Bill", "Smarts", 7, 5);
