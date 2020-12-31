@@ -25,7 +25,7 @@ const inquirer = require('inquirer');
 let curDepartments = []
 let curRoles = []
 let curEmployees = []
-const actions = ["View departments", "View roles", "View employees", "Add departments", "Add roles", "Add employees", "Update employee roles", "Exit"]
+const actions = ["View departments", "View roles", "View employees", "Add department", "Add role", "Add employee", "Update employee role", "Exit"]
 
 // const fs = require('fs');
 // const util = require('util');
@@ -100,19 +100,19 @@ const eeManage = () => {
           viewEmployees();
           break;
 
-        case "Add departments":
+        case "Add department":
           addDepartments();
           break;
         
-        case "Add roles":
+        case "Add role":
           addRoles();
           break;
 
-        case "Add employees":
+        case "Add employee":
           addEmployees();
           break;
 
-        case "Update employee roles":
+        case "Update employee role":
           updateRoles();
           break;
 
@@ -128,7 +128,7 @@ const eeManage = () => {
 };
 
 const viewDepartments = () => {
-  const query = 'SELECT * FROM department';
+  const query = 'SELECT * FROM department ORDER BY id;';
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
@@ -137,7 +137,7 @@ const viewDepartments = () => {
 };
 
 const viewRoles = () => {
-  const query = 'SELECT * FROM role';
+  const query = 'SELECT * FROM role ORDER BY id;';
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
@@ -146,7 +146,7 @@ const viewRoles = () => {
 };
 
 const viewEmployees = () => {
-  const query = 'SELECT employees.id, employees.first_name, employees.last_name, role.title, department.name, role.salary FROM employees';
+  const query = "SELECT e1.id, e1.first_name, e1.last_name, role.title, department.name, role.salary, concat(e2.first_name,' ',e2.last_name ) AS manager FROM employees AS e1 INNER JOIN role ON role.id = e1.role_id INNER JOIN department ON department.id = role.department_id LEFT JOIN employees AS e2 ON e2.id = e1.manager_id ORDER BY e1.id;";
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
@@ -201,6 +201,15 @@ const addRoles = () => {
 };
 
 const addEmployees = () => {
+  let roles = []
+  let managers = ["None"]
+  curRoles.forEach(({id, title, salary}) => {
+    roles.push(id+" "+title+" "+salary);
+  });
+  curEmployees.forEach(({id, first_name, last_name, }) => {
+    managers.push(id+" "+first_name+" "+last_name);
+  });
+  
   inquirer
     .prompt([
       {
@@ -215,22 +224,37 @@ const addEmployees = () => {
         },
       {
         name: 'role',
-        type: 'integer',
-        message: 'What is their role id?',
+        type: 'list',
+        message: 'What is their role?',
+        choices: roles
         },
       {
         name: 'manager',
-        type: 'integer',
-        message: 'What is the id of their manager?',
+        type: 'list',
+        message: 'Who is their manager?',
+        choices: managers
         },
     ])
     .then((answer) => {
       const query = 'INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);';
-      connection.query(query, [answer.firstName, answer.lastName, answer.role, answer.manager], (err, res) => {
-        if (err) throw err;
-        console.log("Added the employee to the database");
-        setupVar();
-      });
+      let roleValues = answer.role.split(" ")
+      let roleId = roleValues[0]
+      let eeValues = answer.manager.split(" ")
+      if(answer.manager === "None") {
+        let eeId = null
+        connection.query(query, [answer.firstName, answer.lastName, roleId, eeId], (err, res) => {
+          if (err) throw err;
+          console.log("Added the employee to the database");
+          setupVar();
+        });
+      } else {
+        let eeId = eeValues[0]
+        connection.query(query, [answer.firstName, answer.lastName, roleId, eeId], (err, res) => {
+          if (err) throw err;
+          console.log("Added the employee to the database");
+          setupVar();
+        });
+      }
     });
 };
 
