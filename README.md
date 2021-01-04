@@ -21,10 +21,10 @@ This application utilizes the following packages:
 ### EE Manager:
 
 Start:
-![Image of Start](Assets\EE_Manager_Start.PNG)
+![Image of Start](Assets/EE_Manager_Start.PNG)
 
 View Employees:
-![Image of ViewEEs](Assets\EE_Manager_ViewEEs.PNG)
+![Image of ViewEEs](Assets/EE_Manager_ViewEEs.PNG)
 
 ## Table of Contents
 
