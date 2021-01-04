@@ -22,15 +22,11 @@ connection.connect((err) => {
 
 // Variables
 const inquirer = require('inquirer');
+const cTable = require('console.table');
 let curDepartments = []
 let curRoles = []
 let curEmployees = []
 const actions = ["View departments", "View roles", "View employees", "Add department", "Add role", "Add employee", "Update employee role", "Exit"]
-
-// const fs = require('fs');
-// const util = require('util');
-// const { setServers } = require('dns');
-// const tables = ["Department", "Role", "Employees"]
 
 // Set up all of the needed tables as arrays so we can access them.
 const setupVar = async () => {
@@ -137,7 +133,7 @@ const viewDepartments = () => {
 };
 
 const viewRoles = () => {
-  const query = 'SELECT * FROM role ORDER BY id;';
+  const query = 'SELECT role.id, role.title, role.salary, department.name AS department FROM role INNER JOIN department on department.id = role.department_id ORDER BY id;';
   connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
